@@ -1,10 +1,13 @@
 import argparse
 import html.parser
+import logging
 from collections import Counter
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
+LOG = logging.getLogger(__name__)
 
 DEFAULT_MAX_DEPTH = 4
 DEFAULT_NUM_ENTRIES = 10
@@ -53,6 +56,7 @@ def parse_page_data(page_data, current_netloc):
 
 
 def traverse(url):
+    LOG.debug(f"Traversing link {url} ...")
     current_netloc = urlparse(url).netloc
     page = requests.get(url)
     return parse_page_data(page.content, current_netloc)
@@ -73,24 +77,25 @@ def show_results(unigrams, bigrams, num_entries):
 
 def depth_traversal(url, max_depth, num_entries):
     master_uni, master_bi, found_links = traverse(url)
+    depth = 1
 
     traversed_links = set()
     traversed_links.add(url)
 
     new_links = found_links
-    depth = 1
-    print(depth, len(new_links))
-    while depth <= max_depth:
+    while depth < max_depth:
         links_to_visit = new_links
         new_links = set()
+
         for link in links_to_visit:
             uni, bi, found_links = traverse(link)
             master_uni.update(uni)
             master_bi.update(bi)
             new_links.update(found_links - (links_to_visit.union(traversed_links)))
             traversed_links.add(link)
+
         depth += 1
-        print(depth, len(new_links))
+        LOG.debug(depth, len(new_links))
 
     show_results(master_uni, master_bi, num_entries)
 

@@ -1,6 +1,6 @@
 lint:
 	isort --gitignore --check .
-	black -i --check .
+	black --check .
 
 lint-repair:
 	isort --gitignore .
