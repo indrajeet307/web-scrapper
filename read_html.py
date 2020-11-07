@@ -47,6 +47,31 @@ def traverse(url):
     page=requests.get(url)
     return parse_page_data(page.content, current_netloc)
 
+
+MAX_DEPTH = 4
+
+
+def depth_traversal(url):
+    u, b, found_links = traverse(url)
+
+    traversed_links = set()
+    traversed_links.add(url)
+
+    new_links = found_links
+    depth = 1
+    print(depth, len(new_links))
+    while depth <= MAX_DEPTH:
+        links_to_visit = new_links
+        new_links = set()
+        for link in links_to_visit:
+            u, b, found_links = traverse(link)
+            new_links.update(found_links - (links_to_visit.union(traversed_links)))
+            traversed_links.add(link)
+        depth += 1
+        print(depth, len(new_links))
+
+
 if __name__ == "__main__":
     url = "http://www.314e.com/"
-    print(traverse(url))
+    # print(traverse(url))
+    print(depth_traversal(url))
