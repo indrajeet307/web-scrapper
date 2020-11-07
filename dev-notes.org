@@ -1,3 +1,10 @@
+* Running unit-test
+
+#+begin_src bash
+make unit-test
+#+end_src
+
+
 * Running lint
 
 #+begin_src bash
