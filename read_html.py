@@ -1,9 +1,13 @@
+import argparse
 import html.parser
 from collections import Counter
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
+DEFAULT_MAX_DEPTH = 4
+DEFAULT_NUM_ENTRIES = 10
 
 
 def is_external_link(link, current_netloc):
@@ -54,24 +58,20 @@ def traverse(url):
     return parse_page_data(page.content, current_netloc)
 
 
-MAX_DEPTH = 4
-NUM_ENTRIES = 10
-
-
-def show_results(unigrams, bigrams):
+def show_results(unigrams, bigrams, num_entries):
 
     print("List Unigrams:")
-    for unigram, count in unigrams.most_common(NUM_ENTRIES):
+    for unigram, count in unigrams.most_common(num_entries):
         print(unigram, count)
 
     print()
 
     print("List Bigrams:")
-    for bigram, count in bigrams.most_common(NUM_ENTRIES):
+    for bigram, count in bigrams.most_common(num_entries):
         print(bigram, count)
 
 
-def depth_traversal(url):
+def depth_traversal(url, max_depth, num_entries):
     master_uni, master_bi, found_links = traverse(url)
 
     traversed_links = set()
@@ -80,7 +80,7 @@ def depth_traversal(url):
     new_links = found_links
     depth = 1
     print(depth, len(new_links))
-    while depth <= MAX_DEPTH:
+    while depth <= max_depth:
         links_to_visit = new_links
         new_links = set()
         for link in links_to_visit:
@@ -92,9 +92,30 @@ def depth_traversal(url):
         depth += 1
         print(depth, len(new_links))
 
-    show_results(master_uni, master_bi)
+    show_results(master_uni, master_bi, num_entries)
 
 
 if __name__ == "__main__":
-    url = "http://www.314e.com/"
-    depth_traversal(url)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--url",
+        required=True,
+        help="Base url to start looking for unigrams and bigrams",
+    )
+    parser.add_argument(
+        "-d",
+        "--depth",
+        type=int,
+        default=DEFAULT_MAX_DEPTH,
+        help="Maximum depth to search for urls",
+    )
+    parser.add_argument(
+        "-n",
+        "--num-top-entries",
+        type=int,
+        default=DEFAULT_NUM_ENTRIES,
+        help="Total number of unigrams and bigrams to show",
+    )
+    args = parser.parse_args()
+
+    depth_traversal(args.url, args.depth, args.num_top_entries)
