@@ -44,8 +44,7 @@ def parse_page_data(page_data, current_netloc):
     anchors = soup.find_all("a")
     text_sections = soup.find_all(text=True)
     links = get_links(anchors, current_netloc)
-    # uni_grams, bi_grams = get_unigrams_bigrams(text_sections)
-    uni_grams, bi_grams = None, None
+    uni_grams, bi_grams = get_unigrams_bigrams(text_sections)
     return uni_grams, bi_grams, links
 
 
@@ -56,10 +55,24 @@ def traverse(url):
 
 
 MAX_DEPTH = 4
+NUM_ENTRIES = 10
+
+
+def show_results(unigrams, bigrams):
+
+    print("List Unigrams:")
+    for unigram, count in unigrams.most_common(NUM_ENTRIES):
+        print(unigram, count)
+
+    print()
+
+    print("List Bigrams:")
+    for bigram, count in bigrams.most_common(NUM_ENTRIES):
+        print(bigram, count)
 
 
 def depth_traversal(url):
-    u, b, found_links = traverse(url)
+    master_uni, master_bi, found_links = traverse(url)
 
     traversed_links = set()
     traversed_links.add(url)
@@ -71,14 +84,17 @@ def depth_traversal(url):
         links_to_visit = new_links
         new_links = set()
         for link in links_to_visit:
-            u, b, found_links = traverse(link)
+            uni, bi, found_links = traverse(link)
+            master_uni.update(uni)
+            master_bi.update(bi)
             new_links.update(found_links - (links_to_visit.union(traversed_links)))
             traversed_links.add(link)
         depth += 1
         print(depth, len(new_links))
 
+    show_results(master_uni, master_bi)
+
 
 if __name__ == "__main__":
     url = "http://www.314e.com/"
-    # print(traverse(url))
-    print(depth_traversal(url))
+    depth_traversal(url)
