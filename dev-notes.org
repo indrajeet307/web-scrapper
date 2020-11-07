@@ -1,0 +1,14 @@
+* Running lint
+
+#+begin_src bash
+make lint
+#+end_src
+
+* Fixing lint issues
+
+#+begin_src bash
+make lint-repair
+#+end_src
+
+Above command may update the source files make sure you run 'git
+status' to check for updates and commit.
