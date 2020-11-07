@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import html.parser
 import logging
 from collections import Counter
@@ -11,6 +12,7 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_MAX_DEPTH = 4
 DEFAULT_NUM_ENTRIES = 10
+DEFAULT_NUM_WORKERS = 10
 
 
 def is_external_link(link, current_netloc):
@@ -75,6 +77,47 @@ def show_results(unigrams, bigrams, num_entries):
         print(bigram, count)
 
 
+def depth_traversal_with_concurrency(url, max_depth, num_entries, max_workers):
+    master_uni, master_bi, found_links = traverse(url)
+    depth = 1
+
+    traversed_links = set()
+    traversed_links.add(url)
+
+    new_links = found_links
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=max_workers
+    ) as executor_pool:
+
+        while depth < max_depth:
+            links_to_visit = new_links
+            new_links = set()
+
+            future_traverse = {
+                executor_pool.submit(traverse, link): link for link in links_to_visit
+            }
+            for future in concurrent.futures.as_completed(future_traverse):
+                link = future_traverse[future]
+                try:
+                    uni, bi, found_links = future.result()
+                except Exception as exc:
+                    LOG.error(f"Error while traversing {link}")
+                else:
+                    master_uni.update(uni)
+                    master_bi.update(bi)
+                    new_links.update(
+                        found_links - (links_to_visit.union(traversed_links))
+                    )
+
+                traversed_links.add(link)
+
+            depth += 1
+            LOG.debug(depth, len(new_links))
+
+    show_results(master_uni, master_bi, num_entries)
+
+
 def depth_traversal(url, max_depth, num_entries):
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
@@ -121,6 +164,16 @@ if __name__ == "__main__":
         default=DEFAULT_NUM_ENTRIES,
         help="Total number of unigrams and bigrams to show",
     )
+    parser.add_argument(
+        "-w",
+        "--num-workers",
+        type=int,
+        default=DEFAULT_NUM_WORKERS,
+        help="Total number of workers to use while using concurrency",
+    )
     args = parser.parse_args()
 
-    depth_traversal(args.url, args.depth, args.num_top_entries)
+    depth_traversal_with_concurrency(
+        args.url, args.depth, args.num_top_entries, args.max_workers
+    )
+    # depth_traversal(args.url, args.depth, args.num_top_entries)
