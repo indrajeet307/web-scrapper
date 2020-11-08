@@ -1,6 +1,7 @@
 * Prerequisites
 
  - python3.6
+ - docker
 
 * Creating and using virtual environment
 
@@ -30,6 +31,14 @@ status' to check for updates and commit.
 #+begin_src bash
 make unit-test
 #+end_src
+
+* Running integ-test
+
+#+begin_src bash
+make integ-test
+#+end_src
+
+Note: there is a bug with integ tests, the docker spawned docker server does not get removed
 
 * Running script
 
