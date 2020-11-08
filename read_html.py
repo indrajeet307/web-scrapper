@@ -13,8 +13,6 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_MAX_DEPTH = 4
 DEFAULT_NUM_ENTRIES = 10
-DEFAULT_NUM_WORKERS = 10
-
 
 def is_external_link(link, current_netloc):
     return urlparse(link).netloc != current_netloc
@@ -78,7 +76,7 @@ def show_results(unigrams, bigrams, num_entries):
         print(bigram, count)
 
 
-def depth_traversal_with_concurrency(url, max_depth, max_workers):
+def depth_traversal_with_concurrency(url, max_depth, num_workers):
     LOG.info(f"Exploring {url} till depth of {max_depth} links with {num_workers} workers ...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
@@ -88,7 +86,7 @@ def depth_traversal_with_concurrency(url, max_depth, max_workers):
 
     new_links = found_links
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor_pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor_pool:
 
         while depth < max_depth:
             links_to_visit = new_links
@@ -167,7 +165,7 @@ if __name__ == "__main__":
         "-w",
         "--num-workers",
         type=int,
-        default=DEFAULT_NUM_WORKERS,
+        default=0,
         help="Total number of workers to use while using concurrency",
     )
     parser.add_argument(
@@ -181,5 +179,10 @@ if __name__ == "__main__":
     LOG.setLevel(logging.INFO)
     if args.log_level > 1:
         LOG.setLevel(logging.DEBUG)
+
+    if args.num_workers:
+        unigrams, bigrams = depth_traversal_with_concurrency(args.url, args.depth, args.num_workers)
+    else:
+        unigrams, bigrams = depth_traversal(args.url, args.depth)
 
     show_results(unigrams, bigrams, args.num_top_entries)
