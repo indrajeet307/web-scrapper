@@ -10,13 +10,11 @@ soure VENV/bin/activate
 make install
 #+end_src
 
-
 * Running lint
 
 #+begin_src bash
 make lint
 #+end_src
-
 
 * Fixing lint issues
 
