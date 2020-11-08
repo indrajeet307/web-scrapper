@@ -14,6 +14,7 @@ LOG = logging.getLogger(__name__)
 DEFAULT_MAX_DEPTH = 4
 DEFAULT_NUM_ENTRIES = 10
 
+
 def is_external_link(link, current_netloc):
     return urlparse(link).netloc != current_netloc
 
@@ -77,7 +78,7 @@ def show_results(unigrams, bigrams, num_entries):
 
 
 def depth_traversal_with_concurrency(url, max_depth, num_workers):
-    LOG.info(f"Exploring {url} till depth of {max_depth} links with {num_workers} workers ...")
+    LOG.info(f"Exploring {url} till depth of {max_depth} links with {num_workers} workers...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
 
@@ -171,7 +172,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-l",
         "--log-level",
-        action='count',
+        default=0,
+        action="count",
         help="Set logging level, -l for info, -ll for debug",
     )
     args = parser.parse_args()
