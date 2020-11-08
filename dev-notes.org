@@ -1,7 +1,8 @@
-* Running unit-test
-
+* Creating and using virtual environment
 #+begin_src bash
-make unit-test
+make venv
+soure VENV/bin/activate
+make install
 #+end_src
 
 
@@ -11,6 +12,7 @@ make unit-test
 make lint
 #+end_src
 
+
 * Fixing lint issues
 
 #+begin_src bash
@@ -19,3 +21,9 @@ make lint-repair
 
 Above command may update the source files make sure you run 'git
 status' to check for updates and commit.
+
+* Running unit-test
+
+#+begin_src bash
+make unit-test
+#+end_src
