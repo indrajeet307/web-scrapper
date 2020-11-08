@@ -16,10 +16,14 @@ DEFAULT_NUM_ENTRIES = 10
 
 
 def is_external_link(link, current_netloc):
+    """Check if link belongs to original server"""
+
     return urlparse(link).netloc != current_netloc
 
 
 def get_links(anchor_tags, current_netloc):
+    """Given list of anchors find all links that belong to original server"""
+
     links = set()
     for anchor in anchor_tags:
         anchor_link = anchor.attrs.get("href")
@@ -29,6 +33,8 @@ def get_links(anchor_tags, current_netloc):
 
 
 def generate_ngrams(word_list, n):
+    """Given list of word list, find n-grams from the words"""
+
     ngram_list = []
 
     for x in range(0, len(word_list) - n + 1):
@@ -39,6 +45,8 @@ def generate_ngrams(word_list, n):
 
 
 def get_unigrams_bigrams(text_sections):
+    """Given text sections on a page return list on unigrams and bigrams on that page"""
+
     uni_grams, bi_grams = Counter(), Counter()
     ignore_tags = ["script", "noscript", "css", "style"]
     for section in text_sections:
@@ -49,6 +57,8 @@ def get_unigrams_bigrams(text_sections):
 
 
 def parse_page_data(page_data, current_netloc):
+    """Given page data return unigrams, bigrams and valid url links found on that page"""
+
     soup = BeautifulSoup(page_data, "html.parser")
     anchors = soup.find_all("a")
     text_sections = soup.find_all(text=True)
@@ -58,6 +68,8 @@ def parse_page_data(page_data, current_netloc):
 
 
 def traverse(url):
+    """Given url link, find all the relevent data on that page"""
+
     LOG.debug(f"Traversing link {url} ...")
     current_netloc = urlparse(url).netloc
     page = requests.get(url)
@@ -65,6 +77,7 @@ def traverse(url):
 
 
 def show_results(unigrams, bigrams, num_entries):
+    """Display the top num_entries unigrams, birgams"""
 
     print("List Unigrams:")
     for unigram, count in unigrams.most_common(num_entries):
@@ -78,6 +91,8 @@ def show_results(unigrams, bigrams, num_entries):
 
 
 def depth_traversal_with_concurrency(url, max_depth, num_workers):
+    """Traverse the given url upto max_depth using num_workers concurrently"""
+
     LOG.info(f"Exploring {url} till depth of {max_depth} links with {num_workers} workers...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
@@ -116,6 +131,8 @@ def depth_traversal_with_concurrency(url, max_depth, num_workers):
 
 
 def depth_traversal(url, max_depth):
+    """Traverse the given url upto max_depth using a single thread"""
+
     LOG.info(f"Exploring {url} till depth of {max_depth} links ...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
