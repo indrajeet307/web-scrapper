@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+logging.basicConfig()
 LOG = logging.getLogger(__name__)
 
 DEFAULT_MAX_DEPTH = 4
@@ -78,6 +79,7 @@ def show_results(unigrams, bigrams, num_entries):
 
 
 def depth_traversal_with_concurrency(url, max_depth, max_workers):
+    LOG.info(f"Exploring {url} till depth of {max_depth} links with {num_workers} workers ...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
 
@@ -109,12 +111,13 @@ def depth_traversal_with_concurrency(url, max_depth, max_workers):
                 traversed_links.add(link)
 
             depth += 1
-            LOG.debug(depth, len(new_links))
+            LOG.info(f"Found {len(new_links)} links at depth {depth}")
 
     return master_uni, master_bi
 
 
 def depth_traversal(url, max_depth):
+    LOG.info(f"Exploring {url} till depth of {max_depth} links ...")
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
 
@@ -134,7 +137,7 @@ def depth_traversal(url, max_depth):
             traversed_links.add(link)
 
         depth += 1
-        LOG.debug(depth, len(new_links))
+        LOG.info(f"Found {len(new_links)} links at depth {depth}")
 
     return master_uni, master_bi
 
@@ -167,8 +170,16 @@ if __name__ == "__main__":
         default=DEFAULT_NUM_WORKERS,
         help="Total number of workers to use while using concurrency",
     )
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        action='count',
+        help="Set logging level, -l for info, -ll for debug",
+    )
     args = parser.parse_args()
 
-    # unigrams, bigrams = depth_traversal_with_concurrency(args.url, args.depth, args.num_workers)
-    unigrams, bigrams = depth_traversal(args.url, args.depth)
+    LOG.setLevel(logging.INFO)
+    if args.log_level > 1:
+        LOG.setLevel(logging.DEBUG)
+
     show_results(unigrams, bigrams, args.num_top_entries)
