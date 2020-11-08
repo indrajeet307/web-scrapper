@@ -6,12 +6,8 @@ import read_html as rh
 class TestReadHtml(unittest.TestCase):
     def test_is_externla_link(self):
 
-        self.assertFalse(
-            rh.is_external_link("http://www.test.com/about", "www.test.com")
-        )
-        self.assertTrue(
-            rh.is_external_link("http://www.test.com/about", "www.test1.com")
-        )
+        self.assertFalse(rh.is_external_link("http://www.test.com/about", "www.test.com"))
+        self.assertTrue(rh.is_external_link("http://www.test.com/about", "www.test1.com"))
 
     def test_get_data(self):
         test_html = """

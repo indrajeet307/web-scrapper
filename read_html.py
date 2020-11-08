@@ -77,7 +77,7 @@ def show_results(unigrams, bigrams, num_entries):
         print(bigram, count)
 
 
-def depth_traversal_with_concurrency(url, max_depth, num_entries, max_workers):
+def depth_traversal_with_concurrency(url, max_depth, max_workers):
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
 
@@ -86,9 +86,7 @@ def depth_traversal_with_concurrency(url, max_depth, num_entries, max_workers):
 
     new_links = found_links
 
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=max_workers
-    ) as executor_pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor_pool:
 
         while depth < max_depth:
             links_to_visit = new_links
@@ -106,19 +104,17 @@ def depth_traversal_with_concurrency(url, max_depth, num_entries, max_workers):
                 else:
                     master_uni.update(uni)
                     master_bi.update(bi)
-                    new_links.update(
-                        found_links - (links_to_visit.union(traversed_links))
-                    )
+                    new_links.update(found_links - (links_to_visit.union(traversed_links)))
 
                 traversed_links.add(link)
 
             depth += 1
             LOG.debug(depth, len(new_links))
 
-    show_results(master_uni, master_bi, num_entries)
+    return master_uni, master_bi
 
 
-def depth_traversal(url, max_depth, num_entries):
+def depth_traversal(url, max_depth):
     master_uni, master_bi, found_links = traverse(url)
     depth = 1
 
@@ -140,7 +136,7 @@ def depth_traversal(url, max_depth, num_entries):
         depth += 1
         LOG.debug(depth, len(new_links))
 
-    show_results(master_uni, master_bi, num_entries)
+    return master_uni, master_bi
 
 
 if __name__ == "__main__":
@@ -173,7 +169,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    depth_traversal_with_concurrency(
-        args.url, args.depth, args.num_top_entries, args.max_workers
-    )
-    # depth_traversal(args.url, args.depth, args.num_top_entries)
+    # unigrams, bigrams = depth_traversal_with_concurrency(args.url, args.depth, args.num_workers)
+    unigrams, bigrams = depth_traversal(args.url, args.depth)
+    show_results(unigrams, bigrams, args.num_top_entries)
