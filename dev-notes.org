@@ -27,3 +27,17 @@ status' to check for updates and commit.
 #+begin_src bash
 make unit-test
 #+end_src
+
+* Running script
+
+Run the script using single threaded applications
+
+  #+begin_src bash
+python read_html.py --url http://www.314e.com
+  #+end_src
+
+Run the script with concurrency, with use 5 workers
+
+  #+begin_src bash
+python read_html.py --url http://www.314e.com -w 5
+  #+end_src
