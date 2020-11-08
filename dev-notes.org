@@ -1,4 +1,9 @@
+* Prerequisites
+
+ - python3.6
+
 * Creating and using virtual environment
+
 #+begin_src bash
 make venv
 soure VENV/bin/activate
@@ -41,3 +46,12 @@ Run the script with concurrency, with use 5 workers
   #+begin_src bash
 python read_html.py --url http://www.314e.com -w 5
   #+end_src
+
+Logging can be increased by using `-l` or `-ll` flags
+
+* Clean up the virual environment
+
+#+begin_src bash
+deactivate
+make clean
+#+end_src

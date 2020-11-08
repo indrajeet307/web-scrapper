@@ -14,5 +14,7 @@ lint-repair:
 	echo ">>> Use 'git status' to check updated files"
 
 unit-test:
-	python3.6 -m unittest test_read_html.py -v
+	python -m unittest test_read_html.py -v
 
+clean:
+	rm -rf VENV
